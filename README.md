@@ -32,7 +32,7 @@ module "waf_acl" {
 
 | Name | Description |
 |------|-------------|
-| waf\_acl\_arn | WAF ACL ARN to be attached to CloudFront  |
+| arn | WAF ACL ARN to be attached to CloudFront  |
 
 ## Authors
 
