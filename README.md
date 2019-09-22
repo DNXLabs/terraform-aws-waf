@@ -25,7 +25,7 @@ module "waf_acl" {
 |------|-------------|:----:|:-----:|:-----:|
 | sql\_injection | Whether to deploy the rule set for sql injection | bool | `"false"` | no |
 | cross\_site\_scripting | Whether to deploy the rule set for cross site scripting | bool | `"false"` | no |
-| ip\_blacklist.enable | Whether to deploy the rule set for ip blacklist | bool | `"false"` | no |
+| ip\_blacklist.enable | Whether to deploy the rule set for ip blacklist. Requires at least one IP in the blacklist | bool | `"false"` | no |
 | ip\_blacklist.list | List of network address to blacklist. `10.0.0.0/8` | list(string) | `[]` | no |
 
 ## Outputs
