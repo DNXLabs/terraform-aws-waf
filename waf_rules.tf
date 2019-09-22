@@ -1,5 +1,5 @@
 resource "aws_waf_rule" "sql_injection_rule" {
-  count       = var.sql_injection ? 1 : 0
+  count       = var.options.enable && var.options.sql_injection ? 1 : 0
   depends_on  = ["aws_waf_sql_injection_match_set.sql_injection_set"]
   name        = "SQL Injection Rule"
   metric_name = "SQLInjectionRule"
@@ -12,7 +12,7 @@ resource "aws_waf_rule" "sql_injection_rule" {
 }
 
 resource "aws_waf_rule" "xss_rule" {
-  count       = var.cross_site_scripting ? 1 : 0
+  count       = var.options.enable && var.options.cross_site_scripting ? 1 : 0
   depends_on  = ["aws_waf_xss_match_set.xss_set"]
   name        = "XSS Rule"
   metric_name = "XssRule"
@@ -21,5 +21,18 @@ resource "aws_waf_rule" "xss_rule" {
     data_id = aws_waf_xss_match_set.xss_set[count.index].id
     negated = false
     type    = "XssMatch"
+  }
+}
+
+resource "aws_waf_rule" "ip_blacklist_rule" {
+  count       = var.options.enable && var.options.ip_blacklist.enable ? 1 : 0
+  depends_on  = ["aws_waf_ipset.ip_set"]
+  name        = "IP BlackList Rule"
+  metric_name = "IPBlacklistRule"
+
+  predicates {
+    data_id = aws_waf_ipset.ip_set[count.index].id
+    negated = false
+    type    = "IPMatch"
   }
 }
