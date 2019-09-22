@@ -8,33 +8,33 @@ resource "aws_waf_web_acl" "waf_acl" {
   }
 
   dynamic "rules" {
-    for_each = var.options.sql_injection ? [var.options] : []
+    for_each = var.sql_injection ? [var.sql_injection] : []
     content {
       action {
         type = "BLOCK"
       }
 
-      priority = 1
+      priority = 3
       rule_id  = aws_waf_rule.sql_injection_rule[0].id
       type     = "REGULAR"
     }
   }
 
   dynamic "rules" {
-    for_each = var.options.sql_injection ? [var.options] : []
+    for_each = var.cross_site_scripting ? [var.cross_site_scripting] : []
     content {
       action {
         type = "BLOCK"
       }
 
-      priority = 1
+      priority = 2
       rule_id  = aws_waf_rule.xss_rule[0].id
       type     = "REGULAR"
     }
   }
 
   dynamic "rules" {
-    for_each = var.options.ip_blacklist.enable ? [var.options] : []
+    for_each = var.ip_blacklist.enable ? [var.ip_blacklist] : []
     content {
       action {
         type = "BLOCK"

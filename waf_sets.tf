@@ -6,7 +6,7 @@
 #     - Body (URL & HTML decode transformation)
 ###################################################################
 resource "aws_waf_sql_injection_match_set" "sql_injection_set" {
-  count = var.options.sql_injection ? 1 : 0
+  count = var.sql_injection ? 1 : 0
   name  = "detect-sqlinjection-set"
 
   sql_injection_match_tuples {
@@ -67,7 +67,7 @@ resource "aws_waf_sql_injection_match_set" "sql_injection_set" {
 ###################################################################
 
 resource "aws_waf_xss_match_set" "xss_set" {
-  count = var.options.cross_site_scripting ? 1 : 0
+  count = var.cross_site_scripting ? 1 : 0
   name  = "detect-xss-set"
 
   xss_match_tuples {
@@ -124,11 +124,11 @@ resource "aws_waf_xss_match_set" "xss_set" {
 # Any network range add here will be restricted to access the service
 ###################################################################
 resource "aws_waf_ipset" "ip_set" {
-  count = var.options.ip_blacklist.enable ? 1 : 0
+  count = var.ip_blacklist.enable ? 1 : 0
   name  = "block-ip-set"
 
   dynamic "ip_set_descriptors" {
-    for_each = var.options.ip_blacklist.enable ? var.options.ip_blacklist.list : []
+    for_each = var.ip_blacklist.enable ? var.ip_blacklist.list : []
     content {
       type  = "IPV4"
       value = ip_set_descriptors.value

@@ -1,4 +1,4 @@
-output "waf_acl_arn" {
+output "arn" {
   value       = aws_waf_web_acl.waf_acl.arn
-  description = "WAF ACL arn"
+  description = "WAF ACL arn to be consumed"
 }
