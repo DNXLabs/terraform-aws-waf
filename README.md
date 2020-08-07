@@ -1,6 +1,14 @@
 # terraform-aws-waf
 
-This module creates a Global WAF Web Acl to be used with Cloudfront
+This module creates a Global Web Application Firewall (WAF) Web Acl to be used with Cloudfront
+
+In this module you can deploy dynamic rules to set for:
+ - SQL Injection
+ - Cross Site Scripting
+ - IP Blacklist
+ - Network Blacklist
+
+
 
 ## Usage
 
