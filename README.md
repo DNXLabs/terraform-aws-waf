@@ -41,6 +41,32 @@ module "waf_acl" {
 
 <!--- BEGIN_TF_DOCS --->
 
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | n/a |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| cross\_site\_scripting | n/a | `bool` | `"false"` | no |
+| ip\_blacklist | n/a | <pre>object({<br>    enable = bool<br>    list   = list(string)<br>  })</pre> | <pre>{<br>  "enable": "false",<br>  "list": []<br>}</pre> | no |
+| sql\_injection | n/a | `bool` | `"false"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| id | WAF ACL arn to be consumed |
+
 <!--- END_TF_DOCS --->
 
 
