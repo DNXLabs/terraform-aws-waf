@@ -1,5 +1,8 @@
 # terraform-aws-waf
 
+[![Lint Status](https://github.com/DNXLabs/terraform-aws-waf/workflows/Lint/badge.svg)](https://github.com/DNXLabs/terraform-aws-waf/actions)
+[![LICENSE](https://img.shields.io/github/license/DNXLabs/terraform-aws-waf)](https://github.com/DNXLabs/terraform-aws-waf/blob/master/LICENSE)
+
 This terraform module creates a Global Web Application Firewall(WAF) Web Acl to be used with Cloudfront.
 
 Dynamic rules:
@@ -36,20 +39,10 @@ module "waf_acl" {
 }
 ```
 
-## Inputs
+<!--- BEGIN_TF_DOCS --->
 
-| Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| sql\_injection | Whether to deploy the rule set for sql injection | bool | `"false"` | no |
-| cross\_site\_scripting | Whether to deploy the rule set for cross site scripting | bool | `"false"` | no |
-| ip\_blacklist.enable | Whether to deploy the rule set for ip blacklist. Requires at least one IP in the blacklist | bool | `"false"` | no |
-| ip\_blacklist.list | List of network address to blacklist. `10.0.0.0/8` | list(string) | `[]` | no |
+<!--- END_TF_DOCS --->
 
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| arn | WAF ACL ARN to be attached to CloudFront  |
 
 ## Authors
 
@@ -57,4 +50,4 @@ Module managed by [Allan Denot](https://github.com/adenot).
 
 ## License
 
-Apache 2 Licensed. See LICENSE for full details.
+Apache 2 Licensed. See [LICENSE](https://github.com/DNXLabs/terraform-aws-waf/blob/master/LICENSE) for full details.
