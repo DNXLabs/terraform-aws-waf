@@ -46,7 +46,7 @@ module "waf_acl" {
 
 ## Authors
 
-Module managed by [Allan Denot](https://github.com/adenot).
+Module managed by [DNX Solutions](https://github.com/DNXLabs).
 
 ## License
 
