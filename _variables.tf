@@ -5,15 +5,28 @@ variable "waf_cloudfront_enable" {
   default     = false
 }
 
-variable "cloudfront_name" {
-  description = "Cloudfront distribution Name"
-  type        = string
+variable "waf_regional_enable" {
+  type        = bool
+  description = "Enable WAFv2 to ALB, API Gateway or AppSync GraphQL API"
+  default     = false
 }
 
-# variable "scope" {
-#   type        = string
-#   description = "The scope of this Web ACL. Valid options: CLOUDFRONT, REGIONAL(ALB)."
-# }
+variable "global_rule" {
+  description = "Cloudfront WAF Rule Name"
+  type        = string
+  default     = ""
+}
+
+variable "regional_rule" {
+  description = "Regional WAF Rules for ALB and API Gateway"
+  type        = string
+  default     = ""
+}
+
+variable "scope" {
+  type        = string
+  description = "The scope of this Web ACL. Valid options: CLOUDFRONT, REGIONAL(ALB)."
+}
 
 variable "wafv2_rate_limit_rule" {
   type        = number
@@ -33,12 +46,13 @@ variable "wafv2_managed_block_rule_groups" {
   description = "List of WAF V2 managed rule groups, set to block"
 }
 
+########## Associate WAFv2 Rules to CloudFront, ALB or API Gateway
+
 variable "web_acl_id" {
+  description = "Specify a web ACL ARN to be associated in CloudFront Distribution / # Optional WEB ACLs (WAF) to attach to CloudFront"
   type        = string
-  description = "Web ACL ARN for Cloudfront distribution"
   default     = null
 }
-
 
 variable "associate_alb" {
   type        = bool
@@ -49,6 +63,12 @@ variable "associate_alb" {
 variable "alb_arn" {
   type        = string
   description = "ARN of the ALB to be associated with the WAFv2 ACL."
+  default     = ""
+}
+
+variable "api_gateway_arn" {
+  type        = string
+  description = "ARN of the API Gateway to be associated with the WAFv2 ACL."
   default     = ""
 }
 

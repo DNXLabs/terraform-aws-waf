@@ -1,12 +1,8 @@
 resource "aws_wafv2_web_acl" "waf_cloudfront" {
   count       = var.waf_cloudfront_enable ? 1 : 0
-  name        = "waf-cloudfront-${var.cloudfront_name}"
+  name        = "waf-${var.global_rule}"
   description = "WAF managed rules for Cloudfront"
-  scope       = "REGIONAL"
-
-  providers = {
-    aws.us-east-1 = aws.us-east-1
-  }
+  scope       = var.scope
 
   default_action {
     allow {}
@@ -18,7 +14,7 @@ resource "aws_wafv2_web_acl" "waf_cloudfront" {
     for_each = local.wafv2_rules
 
     content {
-      name     = "waf-${var.cloudfront_name}-${rule.value.type}-${rule.value.name}"
+      name     = "waf-${var.global_rule}-${rule.value.type}-${rule.value.name}"
       priority = rule.key
 
       dynamic "override_action" {
@@ -56,21 +52,20 @@ resource "aws_wafv2_web_acl" "waf_cloudfront" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.cloudfront_name}-${rule.value.type}-${rule.value.name}"
+        metric_name                = "waf-${var.global_rule}-${rule.value.type}-${rule.value.name}"
         sampled_requests_enabled   = false
       }
     }
   }
 
   tags = {
-    Name = "waf-cloudfront-${var.cloudfront_name}-static-application"
+    Name = "waf-cloudfront-${var.global_rule}-static-application"
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "waf-cloudfront-${var.cloudfront_name}-general"
+    metric_name                = "waf-cloudfront-${var.global_rule}-general"
     sampled_requests_enabled   = false
   }
 
 }
-
