@@ -3,39 +3,56 @@
 [![Lint Status](https://github.com/DNXLabs/terraform-aws-waf/workflows/Lint/badge.svg)](https://github.com/DNXLabs/terraform-aws-waf/actions)
 [![LICENSE](https://img.shields.io/github/license/DNXLabs/terraform-aws-waf)](https://github.com/DNXLabs/terraform-aws-waf/blob/master/LICENSE)
 
-This terraform module creates a Global Web Application Firewall(WAF) Web Acl to be used with Cloudfront.
+This terraform module creates two type of WAFv2 Web ACL rules:
+  - CLOUDFRONT is a Global rule used in CloudFront Distribution only
+  - REGIONAL rules can be used in ALB, API Gateway or AppSync GraphQL API
 
-Dynamic rules:
- - SQL Injection
-   - Filter requests that contain possible malicious SQL code. The condition includes filters that evaluate the following parts of requests:
-     - Query string (URL & HTML decode transformation)
-     - URI (URL & HTML decode transformation)
-     - Body (URL & HTML decode transformation)
- - Cross Site Scripting
-   - Filters requests that contain possible malicious scripts. The condition includes filters that evaluate the following parts of requests:
-     - Query string (URL & HTML decode transformation)
-     - URI (URL & HTML decode transformation)
-     - Body (URL & HTML decode transformation)
- - IP Blacklist
-   - Any IP range add here will be restricted to access the service
- - Network Blacklist
-   - Any network range add here will be restricted to access the service
+Follow a commum list of Web ACL rules that can be used by this module and how to setup it, also a link of the documentation with a full list of AWS WAF Rules, you need to use the "Name" of the Rule Groups and take care with WCUs, it's why Web ACL rules can't exceed 1500 WCUs.
+
+  - AWSManagedRulesCommonRuleSet
+  - AWSManagedRulesAmazonIpReputationList
+  - AWSManagedRulesAnonymousIpList
+  - AWSManagedRulesKnownBadInputsRuleSet
+  - wafv2_rate_limit_rule: 2000
+
+Ref.: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
 
 
 ## Usage
 
 ```hcl
-module "waf_acl" {
-  # source             = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=0.1.0"
-  sql_injection        = "true"
-  cross_site_scripting = "true"
-  ip_blacklist         = {
-    enable = "true"
-    list   = [
-      "10.0.0.0/24",
-      "192.168.0.0/16"
-    ]
-  }
+
+module "terraform_aws_wafv2_global" {
+  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=0.2.0"
+  for_each = { for rule in try(local.workspace.wafv2_global.rules, []) : rule.global_rule => rule }
+
+  providers = {
+    aws = aws.us-east-1
+    }
+
+  waf_cloudfront_enable     = try(each.value.waf_cloudfront_enable, false)
+  web_acl_id                = try(each.value.web_acl_id, "") # Optional WEB ACLs (WAF) to attach to CloudFront
+
+  global_rule               = try(each.value.global_rule, [])
+  wafv2_managed_rule_groups = try(each.value.wafv2_managed_rule_groups, [])
+  wafv2_rate_limit_rule     = try(each.value.wafv2_rate_limit_rule, 0)
+  scope                     = each.value.scope
+}
+
+
+module "terraform_aws_wafv2_regional" {
+  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=0.2.0"
+  for_each = { for rule in try(local.workspace.wafv2_regional.rules, []) : rule.regional_rule => rule }
+
+  waf_regional_enable       = try(each.value.waf_regional_enable, false)  # WAFv2 to ALB, API Gateway or AppSync GraphQL API
+  associate_alb             = try(each.value.associate_alb, false)
+  alb_arn                   = try(each.value.alb_arn, "")
+  api_gateway_arn           = try(each.value.api_gateway_arn, "")
+
+  regional_rule             = try(each.value.regional_rule, [])
+  wafv2_managed_rule_groups = try(each.value.wafv2_managed_rule_groups, [])
+  wafv2_rate_limit_rule     = try(each.value.wafv2_rate_limit_rule, 0)
+  scope                     = each.value.scope
 }
 ```
 
@@ -45,7 +62,7 @@ module "waf_acl" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.0 |
+| terraform | >= 0.13.0 |
 
 ## Providers
 
