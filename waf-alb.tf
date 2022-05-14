@@ -54,7 +54,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
       visibility_config {
         cloudwatch_metrics_enabled = true
         metric_name                = "waf-${var.regional_rule}-${rule.value.type}-${rule.value.name}"
-        sampled_requests_enabled   = false
+        sampled_requests_enabled   = true
       }
     }
   }
@@ -66,7 +66,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
   visibility_config {
     cloudwatch_metrics_enabled = true
     metric_name                = "waf-cloudfront-${var.regional_rule}-general"
-    sampled_requests_enabled   = false
+    sampled_requests_enabled   = true
   }
 
 }
