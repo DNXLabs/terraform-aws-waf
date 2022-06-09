@@ -1,0 +1,12 @@
+    wafv2:
+      global:  # regional:
+        acls:
+        - global_rule_name: "cloudfront-apis"  # regional_rule_name: "api-gateway"
+          waf_cloudfront_enable: true  # waf_regional_enable: true
+          scope: CLOUDFRONT   # "The scope of this Web ACL. Valid options: CLOUDFRONT, REGIONAL(ALB)."
+          wafv2_managed_rule_groups:
+            - "AWSManagedRulesCommonRuleSet"
+            - "AWSManagedRulesAmazonIpReputationList"
+            - "AWSManagedRulesAnonymousIpList"
+            - "AWSManagedRulesKnownBadInputsRuleSet"
+          wafv2_rate_limit_rule: 2000
