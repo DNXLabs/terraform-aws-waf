@@ -23,8 +23,8 @@ Ref.: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-gro
 ```hcl
 
 module "terraform_aws_wafv2_global" {
-  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=0.2.0"
-  for_each = { for rule in try(local.workspace.wafv2_global.rules, []) : rule.global_rule => rule }
+  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=1.0.1"
+  for_each = { for rule in try(local.workspace.wafv2.global.acls, []) : rule.global_rule_name => rule }
 
   providers = {
     aws = aws.us-east-1
@@ -33,26 +33,33 @@ module "terraform_aws_wafv2_global" {
   waf_cloudfront_enable     = try(each.value.waf_cloudfront_enable, false)
   web_acl_id                = try(each.value.web_acl_id, "") # Optional WEB ACLs (WAF) to attach to CloudFront
 
-  global_rule               = try(each.value.global_rule, [])
+  global_rule               = try(each.value.global_rule_name, [])
   wafv2_managed_rule_groups = try(each.value.wafv2_managed_rule_groups, [])
   wafv2_rate_limit_rule     = try(each.value.wafv2_rate_limit_rule, 0)
-  scope                     = each.value.scope
+  scope                     = try(each.value.scope, "CLOUDFRONT")
 }
 
+data "aws_wafv2_web_acl" "web_acl_arn" {
+# count = local.workspace.wafv2.global.waf_cloudfront_web_acl_enable ? 1 : 0
+depends_on = [module.terraform_aws_wafv2_global]
+provider = aws.us-east-1
+  name  = "waf-${local.workspace.wafv2.global.acls.global_rule_name}"
+  scope = "CLOUDFRONT"
+}
 
 module "terraform_aws_wafv2_regional" {
-  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=0.2.0"
-  for_each = { for rule in try(local.workspace.wafv2_regional.rules, []) : rule.regional_rule => rule }
-
+  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=1.0.1"
+  for_each = { for rule in try(local.workspace.wafv2_regional.acls, []) : rule.regional_rule_name => rule }
+ 
   waf_regional_enable       = try(each.value.waf_regional_enable, false)  # WAFv2 to ALB, API Gateway or AppSync GraphQL API
   associate_alb             = try(each.value.associate_alb, false)
   alb_arn                   = try(each.value.alb_arn, "")
   api_gateway_arn           = try(each.value.api_gateway_arn, "")
 
-  regional_rule             = try(each.value.regional_rule, [])
+  regional_rule             = try(each.value.regional_rule_name, [])
   wafv2_managed_rule_groups = try(each.value.wafv2_managed_rule_groups, [])
   wafv2_rate_limit_rule     = try(each.value.wafv2_rate_limit_rule, 0)
-  scope                     = each.value.scope
+  scope                     = try(each.value.scope, "REGIONAL")
 }
 ```
 
