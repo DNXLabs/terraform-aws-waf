@@ -1,5 +1,5 @@
 resource "aws_wafv2_web_acl" "waf_regional" {
-  count       = var.waf_regional_enable ? 1 : 0
+  count = var.waf_regional_enable ? 1 : 0
 
   name        = "waf-${var.regional_rule}"
   description = "Regional WAF managed rules"
