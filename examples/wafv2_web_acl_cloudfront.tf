@@ -1,6 +1,6 @@
 
 resource "aws_cloudfront_distribution" "default" {
-  count               = try(local.workspace.cloudfront.enabled, false) ? 1 : 0  
+  count               = try(local.workspace.cloudfront.enabled, false) ? 1 : 0
   enabled             = local.workspace.cloudfront.enabled
   is_ipv6_enabled     = true
   comment             = join(", ", try(local.workspace.cloudfront.hostnames, []))
@@ -8,8 +8,8 @@ resource "aws_cloudfront_distribution" "default" {
   price_class         = "PriceClass_All"
   wait_for_deployment = false
 
-    depends_on = [module.terraform_aws_wafv2_global]                # Depends-on WAF module to associate Web ACL to CloudFront  
-    web_acl_id = try(data.aws_wafv2_web_acl.web_acl_arn[0].arn, )   # Associate WAF Web ACL to CloudFront 
+  depends_on = [module.terraform_aws_wafv2_global]              # Depends-on WAF module to associate Web ACL to CloudFront  
+  web_acl_id = try(data.aws_wafv2_web_acl.web_acl_arn[0].arn, ) # Associate WAF Web ACL to CloudFront 
 
   origin {
     domain_name = try(local.workspace.cloudfront.lb_dns_name, )
@@ -24,10 +24,10 @@ resource "aws_cloudfront_distribution" "default" {
       origin_read_timeout      = try(local.workspace.cloudfront.cloudfront_origin_read_timeout, "")
     }
 
-#     custom_header {
-#       name  = "fromcloudfront"
-#       value = local.workspace.cloudfront.lb_cloudfront_key # ((Optional) - One or more sub-resources with name and value parameters that specify header data that will be sent to the origin (multiples allowed).)
-#     }
+    #     custom_header {
+    #       name  = "fromcloudfront"
+    #       value = local.workspace.cloudfront.lb_cloudfront_key # ((Optional) - One or more sub-resources with name and value parameters that specify header data that will be sent to the origin (multiples allowed).)
+    #     }
   }
 
 
@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "default" {
 
 
   viewer_certificate {
-    acm_certificate_arn            = try(local.workspace.cloudfront.certificate_arn, "")
+    acm_certificate_arn = try(local.workspace.cloudfront.certificate_arn, "")
     # iam_certificate_id             try(= try(local.workspace.cloudfront.iam_certificate_id, [])
     cloudfront_default_certificate = try(local.workspace.cloudfront.certificate_arn, "") == null && try(local.workspace.cloudfront.iam_certificate_id, []) == null ? true : false
     ssl_support_method             = try(local.workspace.cloudfront.certificate_arn, "") == null && try(local.workspace.cloudfront.iam_certificate_id, []) == null ? null : "sni-only"

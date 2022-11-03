@@ -9,34 +9,46 @@ This terraform module creates two type of WAFv2 Web ACL rules:
 
 Follow a commum list of Web ACL rules that can be used by this module and how to setup it, also a link of the documentation with a full list of AWS WAF Rules, you need to use the "Name" of the Rule Groups and take care with WCUs, it's why Web ACL rules can't exceed 1500 WCUs.
 
-  - AWSManagedRulesCommonRuleSet
-  - AWSManagedRulesAmazonIpReputationList
-  - AWSManagedRulesAnonymousIpList
-  - AWSManagedRulesKnownBadInputsRuleSet
-  - wafv2_rate_limit_rule: 2000
-
-Ref.: https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html
-
+  - byte_match_statement
+  - geo_match_statement
+  - ip_set_reference_statement
+  - managed_rule_group_statement
+    - AWSManagedRulesCommonRuleSet
+    - AWSManagedRulesAmazonIpReputationList
+    - AWSManagedRulesKnownBadInputsRuleSet
+    - AWSManagedRulesSQLiRuleSet
+    - AWSManagedRulesLinuxRuleSet
+    - AWSManagedRulesUnixRuleSet
+  - rate_based_statement
+  - regex_pattern_set_reference_statement
+  - size_constraint_statement
+  - sqli_match_statement
+  - xss_match_statement
 
 ## Usage
 
 ```hcl
 
 module "terraform_aws_wafv2_global" {
-  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=1.0.1"
-  for_each = { for rule in try(local.workspace.wafv2.global.acls, []) : rule.global_rule_name => rule }
-
-  providers = {
-    aws = aws.us-east-1
-    }
+  source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=2.0.0"
+  for_each = { for rule in try(local.workspace.wafv2_global.rules, []) : rule.global_rule => rule }
 
   waf_cloudfront_enable     = try(each.value.waf_cloudfront_enable, false)
   web_acl_id                = try(each.value.web_acl_id, "") # Optional WEB ACLs (WAF) to attach to CloudFront
 
   global_rule               = try(each.value.global_rule_name, [])
-  wafv2_managed_rule_groups = try(each.value.wafv2_managed_rule_groups, [])
-  wafv2_rate_limit_rule     = try(each.value.wafv2_rate_limit_rule, 0)
   scope                     = try(each.value.scope, "CLOUDFRONT")
+
+  ### Statement Rules
+  byte_match_statement_rules                  = try(each.value.byte_match_statement_rules, [])
+  geo_match_statement_rules                   = try(each.value.geo_match_statement_rules, [])
+  ip_set_reference_statement_rules            = try(each.value.ip_set_reference_statement_rules, [])
+  managed_rule_group_statement_rules          = try(each.value.managed_rule_group_statement_rules, [])
+  rate_based_statement_rules                  = try(each.value.rate_based_statement_rules, [])
+  regex_pattern_set_reference_statement_rules = try(each.value.regex_pattern_set_reference_statement_rules, [])
+  size_constraint_statement_rules             = try(each.value.size_constraint_statement_rules, [])
+  sqli_match_statement_rules                  = try(each.value.sqli_match_statement_rules, [])
+  xss_match_statement_rules                   = try(each.value.xss_match_statement_rules, [])
 }
 
 data "aws_wafv2_web_acl" "web_acl_arn" {

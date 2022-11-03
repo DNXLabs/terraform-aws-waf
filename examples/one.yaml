@@ -1,12 +1,170 @@
-    wafv2:
-      global:  # regional:
-        acls:
-        - global_rule_name: "cloudfront-apis"  # regional_rule_name: "api-gateway"
-          waf_cloudfront_enable: true  # waf_regional_enable: true
-          scope: CLOUDFRONT   # "The scope of this Web ACL. Valid options: CLOUDFRONT, REGIONAL(ALB)."
-          wafv2_managed_rule_groups:
-            - "AWSManagedRulesCommonRuleSet"
-            - "AWSManagedRulesAmazonIpReputationList"
-            - "AWSManagedRulesAnonymousIpList"
-            - "AWSManagedRulesKnownBadInputsRuleSet"
-          wafv2_rate_limit_rule: 2000
+wafv2_global:
+  rules:
+    - global_rule: nonprod
+      scope: CLOUDFRONT
+      waf_cloudfront_enable: true
+      byte_match_statement_rules:
+        - name: byte_match_rule
+          priority: 90
+          action: count
+          byte_matchs:
+            - search_string: example
+              positional_constraint: CONTAINS
+          byte_match_statement:
+            - all_query_arguments: ""
+              body:
+              method:
+              query_string:
+              single_header:
+              single_query_argument:
+              uri_path:
+          text_transformation:
+            - priority: 5
+              type: CMD_LINE
+            - priority: 2
+              type: LOWERCASE              
+      geo_match_statement_rules:
+        - name: geo_match_rule
+          priority: 80
+          action: count
+          country_codes:
+            - "US"
+            - "AU"
+          geo_match_statement:
+            - fallback_behavior: MATCH
+              header_name: X-Forwarded-For    
+      managed_rule_group_statement_rules:
+        - name: AWSManagedRulesCommonRuleSet_rule
+          priority: 10
+          override_action: count
+          managed_rule_group_statement:
+            - name: AWSManagedRulesCommonRuleSet
+              vendor_name: AWS
+              excluded_rule:
+                - name: NoUserAgent_HEADER
+        - name: AWSManagedRulesAmazonIpReputationList_rule
+          priority: 20
+          override_action: count
+          managed_rule_group_statement:
+            - name: AWSManagedRulesAmazonIpReputationList
+              vendor_name: AWS
+              excluded_rule: []
+        - name: AWSManagedRulesKnownBadInputsRuleSet_rule
+          priority: 30
+          override_action: count
+          managed_rule_group_statement:
+            - name: AWSManagedRulesKnownBadInputsRuleSet
+              vendor_name: AWS
+              excluded_rule: []
+        - name: AWSManagedRulesSQLiRuleSet_rule
+          priority: 40
+          override_action: count
+          managed_rule_group_statement:
+            - name: AWSManagedRulesSQLiRuleSet
+              vendor_name: AWS
+              excluded_rule: []
+        - name: AWSManagedRulesLinuxRuleSet_rule
+          priority: 50
+          override_action: count
+          managed_rule_group_statement:
+            - name: AWSManagedRulesLinuxRuleSet
+              vendor_name: AWS
+              excluded_rule: []
+        - name: AWSManagedRulesUnixRuleSet_rule
+          priority: 60
+          override_action: count
+          managed_rule_group_statement:
+            - name: AWSManagedRulesUnixRuleSet
+              vendor_name: AWS
+              excluded_rule: []
+      ip_set_reference_statement_rules:
+        - name: ip_set_rule
+          priority: 1
+          action: count
+          ip_set:
+            - "172.10.0.23/32"     # Example 01
+            - "10.180.0.23/32"     # Example 02
+            - "192.168.0.23/32"    # Example 03
+          ip_set_reference_statement:
+            - fallback_behavior: MATCH
+              header_name: X-Forwarded-For
+              position: ANY
+      rate_based_statement_rules:
+        - name: rate_based_rule
+          priority: 112
+          action: count
+          rate_based:
+            - aggregate_key_type: IP
+              limit: 100
+          rate_based_statement:
+            - fallback_behavior: MATCH
+              header_name: X-Forwarded-For
+      regex_pattern_set_reference_statement_rules:
+        - name: regex_pattern_rule
+          priority: 1
+          action: count
+          regex_set:
+            - "[a-z]([a-z0-9_-]*[a-z0-9])?"   # Example 01
+            - "[a-z]([a-z0-9_-])"             # Example 02
+          regex_pattern_set_reference_statement:
+            - all_query_arguments:
+              body:
+              method:
+              query_string:
+              single_header: user-agent
+              single_query_argument:
+              uri_path:            
+          text_transformation:
+            - priority: 6
+              type: NONE
+      size_constraint_statement_rules:
+        - name: size_constraint_rule
+          priority: 110
+          action: count
+          comparison_operator: GT
+          size: 100
+          size_constraint_statement:
+            - all_query_arguments:
+              body:
+              method:
+              query_string:
+              single_header:
+              single_query_argument: username
+              uri_path:
+          text_transformation:
+            - priority: 5
+              type: NONE
+      sqli_match_statement_rules:
+        - name: sqli_match_rule
+          priority: 120
+          action: count
+          sqli_match_statement:
+            - all_query_arguments:
+              body: ""
+              method:
+              query_string:
+              single_header:
+              single_query_argument:
+              uri_path:
+          text_transformation:
+            - priority: 1
+              type: URL_DECODE
+            - priority: 2
+              type: HTML_ENTITY_DECODE
+            - priority: 3
+              type: COMPRESS_WHITE_SPACE
+      xss_match_statement_rules:
+        - name: xss_match_rule
+          priority: 1
+          action: count
+          xss_match_statement:
+            - all_query_arguments:
+              body:
+              method: ""
+              query_string:
+              single_header:
+              single_query_argument:
+              uri_path:
+          text_transformation:
+            - priority: 2
+              type: NONE

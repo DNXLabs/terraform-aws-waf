@@ -28,24 +28,6 @@ variable "scope" {
   description = "The scope of this Web ACL. Valid options: CLOUDFRONT, REGIONAL(ALB)."
 }
 
-variable "wafv2_rate_limit_rule" {
-  type        = number
-  default     = 0
-  description = "The limit on requests per 5-minute period for a single originating IP address (leave 0 to disable)"
-}
-
-variable "wafv2_managed_rule_groups" {
-  type        = list(string)
-  default     = ["AWSManagedRulesCommonRuleSet"]
-  description = "List of WAF V2 managed rule groups, set to count"
-}
-
-variable "wafv2_managed_block_rule_groups" {
-  type        = list(string)
-  default     = []
-  description = "List of WAF V2 managed rule groups, set to block"
-}
-
 ########## Associate WAFv2 Rules to CloudFront, ALB or API Gateway
 
 variable "web_acl_id" {
@@ -73,103 +55,199 @@ variable "api_gateway_arn" {
 }
 
 ########################################################
-##### Aditional Rules (Optional) #######################
+##### List of Statement Rules ##########################
 
-variable "managed_rules" {
+variable "byte_match_statement_rules" {
   type = list(object({
-    name            = string
-    priority        = number
-    override_action = string
-    excluded_rules  = list(string)
-  }))
-  description = "List of Managed WAF rules."
-  default = [
-    {
-      name            = "AWSManagedRulesCommonRuleSet",
-      priority        = 10
-      override_action = "none"
-      excluded_rules  = []
-    },
-    {
-      name            = "AWSManagedRulesAmazonIpReputationList",
-      priority        = 20
-      override_action = "none"
-      excluded_rules  = []
-    },
-    {
-      name            = "AWSManagedRulesKnownBadInputsRuleSet",
-      priority        = 30
-      override_action = "none"
-      excluded_rules  = []
-    },
-    {
-      name            = "AWSManagedRulesSQLiRuleSet",
-      priority        = 40
-      override_action = "none"
-      excluded_rules  = []
-    },
-    {
-      name            = "AWSManagedRulesLinuxRuleSet",
-      priority        = 50
-      override_action = "none"
-      excluded_rules  = []
-    },
-    {
-      name            = "AWSManagedRulesUnixRuleSet",
-      priority        = 60
-      override_action = "none"
-      excluded_rules  = []
-    }
-  ]
-}
-
-variable "ip_sets_rule" {
-  type = list(object({
-    name       = string
-    priority   = number
-    ip_set_arn = string
-    action     = string
-  }))
-  description = "A rule to detect web requests coming from particular IP addresses or address ranges."
-  default     = []
-}
-
-variable "ip_rate_based_rule" {
-  type = object({
     name     = string
     priority = number
-    limit    = number
     action   = string
-  })
-  description = "A rate-based rule tracks the rate of requests for each originating IP address, and triggers the rule action when the rate exceeds a limit that you specify on the number of requests in any 5-minute time span"
-  default     = null
-}
-
-variable "ip_rate_url_based_rules" {
-  type = list(object({
-    name                  = string
-    priority              = number
-    limit                 = number
-    action                = string
-    search_string         = string
-    positional_constraint = string
+    byte_matchs = list(object({
+      positional_constraint = string
+      search_string         = string
+    }))
+    byte_match_statement = list(object({
+      all_query_arguments   = string
+      body                  = string
+      method                = string
+      query_string          = string
+      single_header         = string
+      single_query_argument = string
+      uri_path              = string
+    }))
+    text_transformation = list(object({
+      priority = string
+      type     = string
+    }))
   }))
-  description = "A rate and url based rules tracks the rate of requests for each originating IP address, and triggers the rule action when the rate exceeds a limit that you specify on the number of requests in any 5-minute time span"
-  default     = []
 }
 
-variable "filtered_header_rule" {
-  type = object({
-    header_types = list(string)
-    priority     = number
-    header_value = string
-    action       = string
-  })
-  description = "HTTP header to filter . Currently supports a single header type and multiple header values."
-  default = {
-    header_types = []
-    priority     = 1
-    header_value = ""
-    action       = "block"
-  }
+variable "geo_match_statement_rules" {
+  type = list(object({
+    name          = string
+    priority      = string
+    action        = string
+    country_codes = list(string)
+    geo_match_statement = list(object({
+      fallback_behavior = string
+      header_name       = string
+    }))
+  }))
+}
+
+variable "ip_set_reference_statement_rules" {
+  type = list(object({
+    name     = string
+    priority = string
+    action   = string
+    ip_set   = list(string)
+    ip_set_reference_statement = list(object({
+      fallback_behavior = string
+      header_name       = string
+      position          = string
+    }))
+  }))
+}
+
+variable "managed_rule_group_statement_rules" {
+  type = list(object({
+    name            = string
+    priority        = string
+    override_action = string
+    managed_rule_group_statement = list(object({
+      name        = string
+      vendor_name = string
+      excluded_rule = list(object({
+        name = string
+      }))
+    }))
+  }))
+}
+
+variable "rate_based_statement_rules" {
+  type = list(object({
+    name     = string
+    priority = string
+    action   = string
+    rate_based = list(object({
+      aggregate_key_type = string
+      limit              = number
+    }))
+    rate_based_statement = list(object({
+      fallback_behavior = string
+      header_name       = string
+    }))
+  }))
+}
+
+variable "regex_pattern_set_reference_statement_rules" {
+  type = list(object({
+    name      = string
+    priority  = string
+    action    = string
+    regex_set = list(string)
+    regex_pattern_set_reference_statement = list(object({
+      all_query_arguments   = string
+      body                  = string
+      method                = string
+      query_string          = string
+      single_header         = string
+      single_query_argument = string
+      uri_path              = string
+    }))
+    text_transformation = list(object({
+      priority = number
+      type     = string
+    }))
+  }))
+}
+
+variable "size_constraint_statement_rules" {
+  type = list(object({
+    name                = string
+    priority            = string
+    action              = string
+    comparison_operator = string
+    size                = number
+    size_constraint_statement = list(object({
+      all_query_arguments   = string
+      body                  = string
+      method                = string
+      query_string          = string
+      single_header         = string
+      single_query_argument = string
+      uri_path              = string
+    }))
+    text_transformation = list(object({
+      priority = number
+      type     = string
+    }))
+  }))
+}
+
+variable "sqli_match_statement_rules" {
+  type = list(object({
+    name     = string
+    priority = string
+    action   = string
+    sqli_match_statement = list(object({
+      all_query_arguments   = string
+      body                  = string
+      method                = string
+      query_string          = string
+      single_header         = string
+      single_query_argument = string
+      uri_path              = string
+    }))
+    text_transformation = list(object({
+      priority = number
+      type     = string
+    }))
+  }))
+}
+
+variable "xss_match_statement_rules" {
+  type = list(object({
+    name     = string
+    priority = string
+    action   = string
+    xss_match_statement = list(object({
+      all_query_arguments   = string
+      body                  = string
+      method                = string
+      query_string          = string
+      single_header         = string
+      single_query_argument = string
+      uri_path              = string
+    }))
+    text_transformation = list(object({
+      priority = number
+      type     = string
+    }))
+  }))
+}
+
+variable "default_action" {
+  type    = string
+  default = "block"
+}
+
+variable "visibility_config" {
+  type    = map(string)
+  default = {}
+}
+
+variable "association_resource_arns" {
+  type    = list(string)
+  default = []
+}
+
+variable "log_destination_configs" {
+  type    = list(string)
+  default = []
+}
+
+variable "redacted_fields" {
+  type    = map(any)
+  default = {}
 }
