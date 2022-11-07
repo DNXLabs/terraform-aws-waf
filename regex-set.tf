@@ -1,7 +1,7 @@
 resource "aws_wafv2_regex_pattern_set" "regex_set" {
   for_each = { for rule in try(var.regex_pattern_set_reference_statement_rules, []) : rule.name => rule }
 
-  name  = "waf-regex-${var.global_rule}"
+  name  = "waf-${each.value.name}"
   scope = var.scope
 
   dynamic "regular_expression" {

@@ -1,12 +1,13 @@
-module "terraform_aws_wafv2_global" {
+module "terraform_aws_wafv2_regional" {
   source   = "git::https://github.com/DNXLabs/terraform-aws-waf.git?ref=1.1.0"
-  for_each = { for rule in try(local.workspace.wafv2_global.rules, []) : rule.global_rule => rule }
+  for_each = { for rule in try(local.workspace.wafv2_regional.rules, []) : rule.regional_rule => rule }
 
-  waf_cloudfront_enable = try(each.value.waf_cloudfront_enable, false)
-  web_acl_id            = try(each.value.web_acl_id, "") # Optional WEB ACLs (WAF) to attach to CloudFront
-  global_rule           = try(each.value.global_rule, [])
-  scope                 = each.value.scope
-  default_action        = try(each.value.default_action, "block")
+  waf_regional_enable = try(each.value.waf_regional_enable, false)
+  associate_waf       = try(each.value.associate_waf, false)
+  regional_rule       = try(each.value.regional_rule, [])
+  scope               = each.value.scope
+  resource_arn        = try(each.value.resource_arn, [])
+  default_action      = try(each.value.default_action, "block")
 
   ### Log Configuration
   logs_enable             = try(each.value.logs_enable, false)
@@ -24,16 +25,4 @@ module "terraform_aws_wafv2_global" {
   size_constraint_statement_rules             = try(each.value.size_constraint_statement_rules, [])
   sqli_match_statement_rules                  = try(each.value.sqli_match_statement_rules, [])
   xss_match_statement_rules                   = try(each.value.xss_match_statement_rules, [])
-}
-
-// Used by all workspaces
-data "aws_wafv2_web_acl" "global_waf_cloudfront" {
-  for_each = {
-    for api_gateway in try(local.workspace.api_gateway, []) : api_gateway.cloud_front.waf => api_gateway
-    if api_gateway.cloud_front.create && try(api_gateway.cloud_front.waf, false) != false
-  }
-  provider = aws.us-east-1
-
-  name  = "waf-${each.value.cloud_front.waf}"
-  scope = "CLOUDFRONT"
 }

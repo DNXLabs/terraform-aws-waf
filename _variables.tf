@@ -11,6 +11,18 @@ variable "waf_regional_enable" {
   default     = false
 }
 
+variable "logs_enable" {
+  type        = bool
+  description = "Enable logs"
+  default     = false
+}
+
+variable "logs_retension" {
+  type        = number
+  description = "Specifies the number of days you want to retain log events in the specified log group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653, and 0. If you select 0, the events in the log group are always retained and never expire."
+  default     = 90
+}
+
 variable "global_rule" {
   description = "Cloudfront WAF Rule Name"
   type        = string
@@ -21,6 +33,11 @@ variable "regional_rule" {
   description = "Regional WAF Rules for ALB and API Gateway"
   type        = string
   default     = ""
+}
+
+variable "default_action" {
+  type    = string
+  default = "block"
 }
 
 variable "scope" {
@@ -36,26 +53,19 @@ variable "web_acl_id" {
   default     = null
 }
 
-variable "associate_alb" {
+variable "associate_waf" {
   type        = bool
   description = "Whether to associate an ALB with the WAFv2 ACL."
   default     = false
 }
 
-variable "alb_arn" {
-  type        = string
+variable "resource_arn" {
+  type        = list(string)
   description = "ARN of the ALB to be associated with the WAFv2 ACL."
-  default     = ""
+  default     = []
 }
 
-variable "api_gateway_arn" {
-  type        = string
-  description = "ARN of the API Gateway to be associated with the WAFv2 ACL."
-  default     = ""
-}
-
-########################################################
-##### List of Statement Rules ##########################
+########## Statement Rules
 
 variable "byte_match_statement_rules" {
   type = list(object({
@@ -227,27 +237,28 @@ variable "xss_match_statement_rules" {
   }))
 }
 
-variable "default_action" {
-  type    = string
-  default = "block"
+variable "logging_redacted_fields" {
+  type = list(object({
+    all_query_arguments   = string
+    body                  = string
+    method                = string
+    query_string          = string
+    single_header         = string
+    single_query_argument = string
+    uri_path              = string
+  }))
 }
 
-variable "visibility_config" {
-  type    = map(string)
-  default = {}
-}
-
-variable "association_resource_arns" {
-  type    = list(string)
-  default = []
-}
-
-variable "log_destination_configs" {
-  type    = list(string)
-  default = []
-}
-
-variable "redacted_fields" {
-  type    = map(any)
-  default = {}
+variable "logging_filter" {
+  type = list(object({
+    default_behavior = string
+    filter = list(object({
+      behavior    = string
+      requirement = string
+      condition = list(object({
+        action_condition     = string
+        label_name_condition = string
+      }))
+    }))
+  }))
 }

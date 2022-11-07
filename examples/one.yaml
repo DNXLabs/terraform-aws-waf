@@ -168,3 +168,51 @@ wafv2_global:
           text_transformation:
             - priority: 2
               type: NONE
+wafv2_regional:
+  rules:
+    - regional_rule: vpn-nonprod
+      scope: REGIONAL
+      default_action: allow
+      waf_regional_enable: true
+      associate_waf: true
+      resource_arn:
+         - "arn:aws:apigateway:ap-southeast-2::/restapis/nobbybm8a6/stages/alpha"
+      logs_enable: true
+      logs_retension: 90
+      logging_redacted_fields: []
+      logging_filter:
+        - default_behavior: "DROP"
+          filter:
+            - behavior: "KEEP"
+              requirement: "MEETS_ALL"
+              condition:
+                - label_name_condition: waf-rule-label-vpn-nonprod-byte_match_rule-customers
+                  action_condition:
+      ip_set_reference_statement_rules:
+        - name: ip_set_rule
+          priority: 20
+          action: allow
+          ip_set:
+            - "10.200.0.0/16"
+          ip_set_reference_statement:
+            - fallback_behavior: MATCH
+              header_name: X-Forwarded-For
+              position: ANY
+      byte_match_statement_rules:
+        - name: byte_match_rule-customers
+          priority: 30
+          action: block
+          byte_matchs:
+            - search_string: /alpha/customers
+              positional_constraint: CONTAINS
+          byte_match_statement:
+            - all_query_arguments:
+              body:
+              method:
+              query_string:
+              single_header:
+              single_query_argument:
+              uri_path: ""
+          text_transformation:
+            - priority: 1
+              type: LOWERCASE

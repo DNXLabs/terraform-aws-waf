@@ -6,12 +6,20 @@ resource "aws_wafv2_web_acl" "waf_regional" {
   scope       = var.scope
 
   default_action {
-    allow {}
+    dynamic "allow" {
+      for_each = var.default_action == "allow" ? [1] : []
+      content {}
+    }
+
+    dynamic "block" {
+      for_each = var.default_action == "block" ? [1] : []
+      content {}
+    }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "waf-cloudfront-${var.global_rule}-general"
+    metric_name                = "waf-cloudfront-${var.regional_rule}-general"
     sampled_requests_enabled   = false
   }
 
@@ -20,7 +28,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.byte_match_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -113,8 +121,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = true
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -124,7 +136,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.geo_match_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -153,8 +165,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = true
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -164,7 +180,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.ip_set_reference_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -203,8 +219,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -214,7 +234,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.managed_rule_group_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-managed-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-managed-${rule.value.name}"
       priority = rule.value.priority
 
       override_action {
@@ -249,8 +269,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-managed-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-managed-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -260,7 +284,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.rate_based_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -303,8 +327,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -314,7 +342,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.regex_pattern_set_reference_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -402,8 +430,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -413,7 +445,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.size_constraint_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -504,8 +536,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -515,7 +551,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.sqli_match_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -600,11 +636,14 @@ resource "aws_wafv2_web_acl" "waf_regional" {
         }
       }
 
-
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -614,7 +653,7 @@ resource "aws_wafv2_web_acl" "waf_regional" {
     for_each = { for rule in try(var.xss_match_statement_rules, []) : rule.name => rule }
 
     content {
-      name     = "waf-${var.global_rule}-${rule.value.name}"
+      name     = "waf-${var.regional_rule}-${rule.value.name}"
       priority = rule.value.priority
 
       action {
@@ -701,8 +740,12 @@ resource "aws_wafv2_web_acl" "waf_regional" {
 
       visibility_config {
         cloudwatch_metrics_enabled = true
-        metric_name                = "waf-${var.global_rule}-${rule.value.name}"
+        metric_name                = "waf-${var.regional_rule}-${rule.value.name}"
         sampled_requests_enabled   = false
+      }
+
+      rule_label {
+        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
       }
     }
   }
@@ -712,9 +755,118 @@ resource "aws_wafv2_web_acl" "waf_regional" {
   }
 }
 
-resource "aws_wafv2_web_acl_association" "waf_association_alb" {
-  count        = var.associate_alb ? 1 : 0
-  resource_arn = var.alb_arn
-  #resource_arn = var.api_gateway_arn
-  web_acl_arn = aws_wafv2_web_acl.waf_regional[count.index].arn
+resource "aws_wafv2_web_acl_association" "waf_association" {
+  for_each = {
+    for resource in var.resource_arn : resource => resource
+    if var.associate_waf == true
+  }
+
+  resource_arn = each.key
+  web_acl_arn  = aws_wafv2_web_acl.waf_regional[0].arn
+}
+
+resource "aws_cloudwatch_log_group" "waf_log_group" {
+  count = var.logs_enable ? 1 : 0
+
+  name              = "aws-waf-logs-waf/${var.regional_rule}"
+  retention_in_days = var.logs_retension
+}
+
+resource "aws_wafv2_web_acl_logging_configuration" "waf_logging_configuration" {
+  count = var.logs_enable ? 1 : 0
+
+  log_destination_configs = [aws_cloudwatch_log_group.waf_log_group[count.index].arn]
+  resource_arn            = aws_wafv2_web_acl.waf_regional[count.index].arn
+  depends_on              = [aws_cloudwatch_log_group.waf_log_group]
+
+  dynamic "redacted_fields" {
+    for_each = try(var.logging_redacted_fields, [])
+
+    content {
+      dynamic "single_header" {
+        for_each = redacted_fields.value.all_query_arguments != null ? [1] : []
+
+        content {
+          name = redacted_fields.value.single_header
+        }
+      }
+
+      dynamic "body" {
+        for_each = redacted_fields.value.body != null ? [1] : []
+
+        content {}
+      }
+
+      dynamic "method" {
+        for_each = redacted_fields.value.method != null ? [1] : []
+
+        content {}
+      }
+
+      dynamic "query_string" {
+        for_each = redacted_fields.value.query_string != null ? [1] : []
+
+        content {}
+      }
+      dynamic "single_header" {
+        for_each = redacted_fields.value.single_header != null ? [1] : []
+
+        content {
+          name = redacted_fields.value.single_header
+        }
+      }
+      dynamic "single_query_argument" {
+        for_each = redacted_fields.value.single_query_argument != null ? [1] : []
+
+        content {
+          name = redacted_fields.value.single_query_argument
+        }
+      }
+
+      dynamic "uri_path" {
+        for_each = redacted_fields.value.uri_path != null ? [1] : []
+
+        content {}
+      }
+    }
+  }
+
+  dynamic "logging_filter" {
+    for_each = try(var.logging_filter, [])
+
+    content {
+      default_behavior = logging_filter.value.default_behavior
+
+      dynamic "filter" {
+        for_each = try(logging_filter.value.filter, [])
+
+        content {
+          behavior    = filter.value.behavior
+          requirement = filter.value.requirement
+
+          dynamic "condition" {
+            for_each = try(filter.value.condition, [])
+
+            content {
+              dynamic "action_condition" {
+                for_each = condition.value.action_condition != null ? [1] : []
+
+                content {
+                  action = condition.value.action_condition
+                }
+              }
+
+              dynamic "label_name_condition" {
+                for_each = condition.value.label_name_condition != null ? [1] : []
+
+                content {
+                  label_name = condition.value.label_name_condition
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
