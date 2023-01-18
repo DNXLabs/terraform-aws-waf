@@ -273,9 +273,6 @@ resource "aws_wafv2_web_acl" "waf_regional" {
         sampled_requests_enabled   = false
       }
 
-      rule_label {
-        name = "waf-rule-label-${var.regional_rule}-${rule.value.name}"
-      }
     }
   }
 
