@@ -36,47 +36,81 @@ wafv2_global:
       managed_rule_group_statement_rules:
         - name: AWSManagedRulesCommonRuleSet_rule
           priority: 10
-          override_action: count
           managed_rule_group_statement:
             - name: AWSManagedRulesCommonRuleSet
               vendor_name: AWS
               excluded_rule:
                 - name: NoUserAgent_HEADER
+              block_rule_action_override:
+                - CrossSiteScripting_URIPATH_RC_COUNT
+                - CrossSiteScripting_BODY_RC_COUNT
+                - CrossSiteScripting_QUERYARGUMENTS_RC_COUNT
+                - CrossSiteScripting_COOKIE_RC_COUNT
+                - GenericRFI_BODY_RC_COUNT
+                - RestrictedExtensions_QUERYARGUMENTS_RC_COUNT
+                - RestrictedExtensions_URIPATH_RC_COUNT
+                - GenericLFI_BODY_RC_COUNT
+                - EC2MetaDataSSRF_BODY_RC_COUNT
+                - SizeRestrictions_BODY_RC_COUNT
+                - UserAgent_BadBots_HEADER_RC_COUNT
+                - NoUserAgent_HEADER_RC_COUNT
+                - NoUserAgent_HEADER
+                - UserAgent_BadBots_HEADER
+                - SizeRestrictions_QUERYSTRING
+                - SizeRestrictions_Cookie_HEADER
+                - SizeRestrictions_BODY
+                - SizeRestrictions_URIPATH
+                - EC2MetaDataSSRF_BODY
+                - EC2MetaDataSSRF_COOKIE
+                - EC2MetaDataSSRF_URIPATH
+                - EC2MetaDataSSRF_QUERYARGUMENTS
+                - GenericLFI_QUERYARGUMENTS
+                - GenericLFI_URIPATH
+                - GenericLFI_BODY
+                - RestrictedExtensions_URIPATH
+                - RestrictedExtensions_QUERYARGUMENTS
+                - GenericRFI_QUERYARGUMENTS
+                - GenericRFI_BODY
+                - GenericRFI_URIPATH
+                - CrossSiteScripting_COOKIE
+                - CrossSiteScripting_QUERYARGUMENTS
+                - CrossSiteScripting_BODY
+                - CrossSiteScripting_URIPATH
         - name: AWSManagedRulesAmazonIpReputationList_rule
           priority: 20
-          override_action: count
           managed_rule_group_statement:
             - name: AWSManagedRulesAmazonIpReputationList
               vendor_name: AWS
               excluded_rule: []
+              block_rule_action_override: []
         - name: AWSManagedRulesKnownBadInputsRuleSet_rule
           priority: 30
-          override_action: count
           managed_rule_group_statement:
             - name: AWSManagedRulesKnownBadInputsRuleSet
               vendor_name: AWS
               excluded_rule: []
+              block_rule_action_override: []
         - name: AWSManagedRulesSQLiRuleSet_rule
           priority: 40
-          override_action: count
           managed_rule_group_statement:
             - name: AWSManagedRulesSQLiRuleSet
               vendor_name: AWS
               excluded_rule: []
+              block_rule_action_override: []
         - name: AWSManagedRulesLinuxRuleSet_rule
           priority: 50
-          override_action: count
           managed_rule_group_statement:
             - name: AWSManagedRulesLinuxRuleSet
               vendor_name: AWS
               excluded_rule: []
+              block_rule_action_override: []
         - name: AWSManagedRulesUnixRuleSet_rule
           priority: 60
-          override_action: count
           managed_rule_group_statement:
             - name: AWSManagedRulesUnixRuleSet
               vendor_name: AWS
               excluded_rule: []
+              block_rule_action_override: []
       ip_set_reference_statement_rules:
         - name: ip_set_rule
           priority: 1
