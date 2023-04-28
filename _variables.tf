@@ -121,15 +121,13 @@ variable "ip_set_reference_statement_rules" {
 
 variable "managed_rule_group_statement_rules" {
   type = list(object({
-    name            = string
-    priority        = string
-    override_action = string
+    name     = string
+    priority = string
     managed_rule_group_statement = list(object({
-      name        = string
-      vendor_name = string
-      excluded_rule = list(object({
-        name = string
-      }))
+      name                       = string
+      vendor_name                = string
+      excluded_rule              = list(string)
+      block_rule_action_override = list(string)
     }))
   }))
 }

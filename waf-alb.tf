@@ -256,6 +256,17 @@ resource "aws_wafv2_web_acl" "waf_regional" {
             name        = managed_rule_group_statement.value.name
             vendor_name = managed_rule_group_statement.value.vendor_name
 
+            dynamic "rule_action_override" {
+              for_each = { for block_rule_action_override in try(managed_rule_group_statement.value.block_rule_action_override, []) : block_rule_action_override => block_rule_action_override }
+
+              content {
+                name = rule_action_override.value
+                action_to_use {
+                  block {}
+                }
+              }
+            }
+
             dynamic "excluded_rule" {
               for_each = { for excluded_rule in try(managed_rule_group_statement.value.excluded_rule, []) : excluded_rule.name => excluded_rule }
 
