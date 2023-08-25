@@ -257,13 +257,25 @@ resource "aws_wafv2_web_acl" "waf_regional" {
             vendor_name = managed_rule_group_statement.value.vendor_name
 
             dynamic "rule_action_override" {
-              for_each = { for block_rule_action_override in try(managed_rule_group_statement.value.block_rule_action_override, []) : block_rule_action_override => block_rule_action_override }
+              for_each = { for action_override in try(managed_rule_group_statement.value.rule_action_override, []) : action_override.name => action_override }
 
               content {
-                name = rule_action_override.value
                 action_to_use {
-                  block {}
+                  dynamic "allow" {
+                    for_each = rule_action_override.value.action_to_use == "allow" ? [1] : []
+                    content {}
+                  }
+                  dynamic "block" {
+                    for_each = rule_action_override.value.action_to_use == "block" ? [1] : []
+                    content {}
+                  }
+                  dynamic "count" {
+                    for_each = rule_action_override.value.action_to_use == "count" ? [1] : []
+                    content {}
+                  }
                 }
+
+                name = rule_action_override.value.name
               }
             }
 

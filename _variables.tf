@@ -124,10 +124,15 @@ variable "managed_rule_group_statement_rules" {
     name     = string
     priority = string
     managed_rule_group_statement = list(object({
-      name                       = string
-      vendor_name                = string
-      excluded_rule              = list(string)
-      block_rule_action_override = list(string)
+      name        = string
+      vendor_name = string
+      rule_action_override = list(object({
+        name          = string
+        action_to_use = string
+      }))
+      excluded_rule = list(object({
+        name = string
+      }))
     }))
   }))
 }
