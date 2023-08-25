@@ -127,7 +127,7 @@ variable "managed_rule_group_statement_rules" {
       name                       = string
       vendor_name                = string
       excluded_rule              = list(string)
-      block_rule_action_override = list(string)
+      block_rule_action_override = optional(list(string))
     }))
   }))
 }
